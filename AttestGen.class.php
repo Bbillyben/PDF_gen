@@ -21,50 +21,30 @@ class ATTESTGEN {
     const MISSIONS = 'missions';
     const ENFANTS = 'enfants';
 
-    const certiFName = 'certificate.301020.pdf';
+    const certiFName = 'certificate.301020.pdf';//'30-10-2020-attestation-de-deplacement-derogatoire.pdf'; //
 
     //public $aMemberVar = 'aMemberVar Member Variable';
     public $generate_attest = 'generate_attest';
 
     protected $idPos; // array avec les positions des identifiants
-    protected $motPos; // array avec les position des cases Ã  cocher motif
+    protected $motPos; // array avec les position des cases à cocher motif
 
     protected $url_qrcode; // addresse du Ppng du qrcode au besoin
     protected $url_pdf; // addresse du Ppng du qrcode au besoin
+    protected $certifNamePerso; // si on défini une url perso
 
     function __construct()
     {
-        $this->idPos = array(
-            'NOM'=>array(42,50),
-            'DDN'=>array(42,58),
-            'LIEU_DDN'=>array(105,58),
-            'ADRESSE'=>array(48,66),
-            'SIG_VILLE'=>array(48,234),
-            'SIG_DATE'=>array(33,242),
-            'SIG_HEURE'=>array(93,242),
-            );
-        $this->motPos= array(
-            'TRAVAIL' => array(26,91.5),
-            'ENFANT' => array(26,221),
-            'LOISIR' => array(26,170),
-            'ACHAT' => array(26,108),
-            'SANTE' => array(26,127.5),
-            'FAMILLE' => array(26,141.5),
-            'HANDI' => array(26,156),
-            'JUDIC' => array(26,192),
-            'MIG' => array(26,205.5)
-            );
-
     }
 
-    // retourne l'url du png du QR code une fois le fichier crÃ©Ã©
+    // retourne l'url du png du QR code une fois le fichier créé
     public function getPNGURL(){
         if (!isset($this->url_qrcode)){
             return false;
         }
         return $this->url_qrcode;
     }
-    //retourne l'URL du pdf une fois le fichier crÃ©Ã©
+    //retourne l'URL du pdf une fois le fichier créé
     public function getPDFURL(){
         if (!isset($this->url_pdf)){
             return false;
@@ -72,7 +52,7 @@ class ATTESTGEN {
         return $this->url_pdf;
     }
 
-    // detruit le fichier PDF si crÃ©Ã©
+    // detruit le fichier PDF si créé
     public function deletePDFFile(){
         if (!isset($this->url_pdf)){
             return false;
@@ -84,7 +64,7 @@ class ATTESTGEN {
         return unlink($this->url_pdf);
 
     }
-    // detruit le fichier QR code png crÃ©Ã©
+    // detruit le fichier QR code png créé
     public function deleteQRFile(){
         if (!isset($this->url_qrcode)){
             return false;
@@ -96,28 +76,61 @@ class ATTESTGEN {
         return unlink($this->url_qrcode);
 
     }
-    // dÃ©truit les 2 fichiers
+    // détruit les 2 fichiers
     public function deleteAllFiles(){
         return $this->deletePDFFile() && $this->deleteQRFile();
+    }
+
+    // changement du certif utilisé
+    public function setCertif($name){
+        if(is_file(dirname(__FILE__) . '/Certificate/'.$name)){
+            $this->certifNamePerso=$name;
+            return true;
+        }else{
+            return false;
+        }
     }
     function generate_attest($name,$fname,$ddn,$lieu_ddn,$address,$zip,$ville, $motifs, $secondPage=false) {
 
         // verification si le motif est bien un array
         if(!is_array($motifs)){
             if(is_string($motifs)){
-                $motifs=array($motifs); // si c'est une string on le met dans un array pour le traiter ultÃ©rieurement
+                $motifs=array($motifs); // si c'est une string on le met dans un array pour le traiter ultérieurement
             }else{
                 throw new Exception('Error Motif provided is not an array or a string');
                 return false;
             }
         }
 
+        // load du json pour les positions
+        if(!is_file(dirname(__FILE__) . '/Certificate/position.json')){
+            throw new Exception('Error positions definition not found ('.dirname(__FILE__) . '/Certificate/position.json)');
+            return false;
+        }
+        $stringPos = file_get_contents(dirname(__FILE__) . '/Certificate/position.json');
+        $json_pos = json_decode($stringPos, true);
 
-        // vÃ©rificaiton existance du dossier
+        // choix du certif mis en place
+        if(isset($this->certifNamePerso)){
+            $cn = $this->certifNamePerso;
+        }else{
+            $cn =ATTESTGEN::certiFName;
+        }
+
+        // selection dans le json de la position du certificat de nom
+        if (isset( $json_pos[$cn])){
+            $posDef = $json_pos[$cn];
+
+        }else{
+            $posDef = $json_pos[ATTESTGEN::certiFName]; // par défaut on utilise celui du certif par défaut
+        }
+
+
+        // vérificaiton existance du dossier
         if(!is_dir(dirname(__FILE__) . '/EXPORT')){
             mkdir(dirname(__FILE__) . '/EXPORT');
         }
-        // gÃ©nÃ©ration du QR code
+        // génération du QR code
         $date_time=strftime("%d/%m/%G a %Hh%M");
         $qrcode="Cree le: ".$date_time.";\n Nom: ".$name.";\n Prenom: ".$fname.";\n Naissance: ".$ddn." a ".$lieu_ddn.";\n Adresse: ".$address." ".$zip." ".$ville.";\n Sortie: ".$date_time."\n Motifs: ".implode (",", $motifs);
 
@@ -129,14 +142,15 @@ class ATTESTGEN {
 
 
 
-        // gÃ©nÃ©ration du PDF
+        // génération du PDF
         try {
             $pdf = new FPDI();
             $pdf->addPage();
-            $pageCount = $pdf->setSourceFile(dirname(__FILE__).'/Certificate/'.ATTESTGEN::certiFName);
+
+            $pageCount = $pdf->setSourceFile(dirname(__FILE__).'/Certificate/'.$cn);
             $pageId = $pdf->importPage(1);
             $pdf->useTemplate($pageId);
-            
+
 
         }
         catch (Exception $e) {
@@ -147,71 +161,71 @@ class ATTESTGEN {
         $pdf->SetTextColor(0,0,0);
 
         // NOM
-        $pdf->SetXY($this->idPos['NOM'][0], $this->idPos['NOM'][1]);
+        $pdf->SetXY($posDef['NOM']["x"], $posDef['NOM']["y"]);
         $pdf->Write(0, $fname.' '.$name);
 
         //DDN
-        $pdf->SetXY($this->idPos['DDN'][0], $this->idPos['DDN'][1]);
+        $pdf->SetXY($posDef['DDN']["x"], $posDef['DDN']["y"]);
         $pdf->Write(0, $ddn);
 
         //LIEU_DDN
-        $pdf->SetXY($this->idPos['LIEU_DDN'][0], $this->idPos['LIEU_DDN'][1]);
+        $pdf->SetXY($posDef['LIEU_DDN']["x"], $posDef['LIEU_DDN']["y"]);
         $pdf->Write(0, $lieu_ddn);
 
         //adresse
         // en plus petit
         $pdf->SetFont('Arial', '', '10');
-        $pdf->SetXY($this->idPos['ADRESSE'][0], $this->idPos['ADRESSE'][1]);
+        $pdf->SetXY($posDef['ADRESSE']["x"], $posDef['ADRESSE']["y"]);
         $pdf->Write(0, $address.' '.$zip.' '.$ville);
 
         // pour la signature
         //ville
         $pdf->SetFont('Arial', '', '13');
-        $pdf->SetXY($this->idPos['SIG_VILLE'][0], $this->idPos['SIG_VILLE'][1]);
+        $pdf->SetXY($posDef['SIG_VILLE']["x"], $posDef['SIG_VILLE']["y"]);
         $pdf->Write(0, $ville);
 
         // date
         $cDate = strftime("%d/%m/%G");
-        $pdf->SetXY($this->idPos['SIG_DATE'][0], $this->idPos['SIG_DATE'][1]);
+        $pdf->SetXY($posDef['SIG_DATE']["x"], $posDef['SIG_DATE']["y"]);
         $pdf->Write(0, $cDate);
         //heure
         $cDate = strftime("%Hh%M");
-        $pdf->SetXY($this->idPos['SIG_HEURE'][0], $this->idPos['SIG_HEURE'][1]);
+        $pdf->SetXY($posDef['SIG_HEURE']["x"], $posDef['SIG_HEURE']["y"]);
         $pdf->Write(0, $cDate);
 
 
         ///// pour les motif
 
-        $pdf->SetFont('Arial', '', '16');
+        $pdf->SetFont('Arial', '', $posDef['QRcode']['crossSize']);
         $isOk = true;
         foreach ($motifs as $motif){
             switch ($motif) {
                 case ATTESTGEN::TRAVAIL:
-                    $pdf->SetXY($this->motPos['TRAVAIL'][0], $this->motPos['TRAVAIL'][1]);
+                    $pdf->SetXY($posDef['TRAVAIL']["x"], $posDef['TRAVAIL']["y"]);
                     break;
                 case ATTESTGEN::ENFANTS:
-                    $pdf->SetXY($this->motPos['ENFANT'][0], $this->motPos['ENFANT'][1]);
+                    $pdf->SetXY($posDef['ENFANT']["x"], $posDef['ENFANT']["y"]);
                     break;
                 case ATTESTGEN::SPORT_ANIMAUX:
-                    $pdf->SetXY($this->motPos['LOISIR'][0], $this->motPos['LOISIR'][1]);
+                    $pdf->SetXY($posDef['LOISIR']["x"], $posDef['LOISIR']["y"]);
                     break;
                 case ATTESTGEN::ACHATS:
-                    $pdf->SetXY($this->motPos['ACHAT'][0], $this->motPos['ACHAT'][1]);
+                    $pdf->SetXY($posDef['ACHAT']["x"], $posDef['ACHAT']["y"]);
                     break;
                 case ATTESTGEN::SANTE:
-                    $pdf->SetXY($this->motPos['SANTE'][0], $this->motPos['SANTE'][1]);
+                    $pdf->SetXY($posDef['SANTE']["x"], $posDef['SANTE']["y"]);
                     break;
                 case ATTESTGEN::FAMILLE:
-                    $pdf->SetXY($this->motPos['FAMILLE'][0], $this->motPos['FAMILLE'][1]);
+                    $pdf->SetXY($posDef['FAMILLE']["x"], $posDef['FAMILLE']["y"]);
                     break;
                 case ATTESTGEN::HANDICAP:
-                    $pdf->SetXY($this->motPos['HANDI'][0], $this->motPos['HANDI'][1]);
+                    $pdf->SetXY($posDef['HANDI']["x"], $posDef['HANDI']["y"]);
                     break;
                 case ATTESTGEN::CONVOCATION:
-                    $pdf->SetXY($this->motPos['JUDIC'][0], $this->motPos['JUDIC'][1]);
+                    $pdf->SetXY($posDef['JUDIC']["x"], $posDef['JUDIC']["y"]);
                     break;
                 case ATTESTGEN::MISSIONS:
-                    $pdf->SetXY($this->motPos['MIG'][0], $this->motPos['MIG'][1]);
+                    $pdf->SetXY($posDef['MIG']["x"], $posDef['MIG']["y"]);
                     break;
                 default:
                     $isOk=false;
@@ -221,7 +235,7 @@ class ATTESTGEN {
         }
 
         // le png
-        $pdf->Image($this->url_qrcode,155,230,32,32,'PNG');
+        $pdf->Image($this->url_qrcode,$posDef['QRcode']["x"], $posDef['QRcode']["y"],32,32,'PNG');
 
         if($secondPage){
             $pdf->addPage();
