@@ -12,14 +12,14 @@ class ATTESTGEN {
 
     // constante pour les motifs
     const TRAVAIL = 'travail';
-    const ENFANT = 'enfant';
-    const LOISIR = 'loisir';
-    const ACHAT = 'Achats';
-    const SANTE = 'Soins';
-    const FAMILLE = 'Famille';
-    const HANDI = 'handicap';
-    const JUDIC = 'judiciaire';
-    const MIG = 'mission';
+    const ACHATS = 'achats';
+    const SANTE = 'sante';
+    const FAMILLE = 'famille';
+    const HANDICAP = 'handicap';
+    const SPORT_ANIMAUX = 'sport_animaux';
+    const CONVOCATION = 'convocation';
+    const MISSIONS = 'missions';
+    const ENFANTS = 'enfants';
 
     //public $aMemberVar = 'aMemberVar Member Variable';
     public $generate_attest = 'generate_attest';
@@ -98,7 +98,7 @@ class ATTESTGEN {
     public function deleteAllFiles(){
         return $this->deletePDFFile() && $this->deleteQRFile();
     }
-    function generate_attest($name,$fname,$ddn,$lieu_ddn,$address,$zip,$ville, $motifs) {
+    function generate_attest($name,$fname,$ddn,$lieu_ddn,$address,$zip,$ville, $motifs, $secondPage=false) {
 
 
         // vérificaiton existance du dossier
@@ -107,8 +107,8 @@ class ATTESTGEN {
         }
         // génération du QR code
         $date_time=strftime("%d/%m/%G a %Hh%M");
-        $qrcode="Cree le: ".$date_time.";\nNom: ".$name.";\nPrenom: ".$fname.";\nNaissance: ".$ddn." a ".$lieu_ddn.";\nAdresse:".$address." ".$zip." ".$ville.";\nSortie: ".$date_time."\nMotifs: ".implode (",", $motifs);
-      
+        $qrcode="Cree le: ".$date_time.";\n Nom: ".$name.";\n Prenom: ".$fname.";\n Naissance: ".$ddn." a ".$lieu_ddn.";\n Adresse: ".$address." ".$zip." ".$ville.";\n Sortie: ".$date_time."\n Motifs: ".implode (",", $motifs);
+
         $this->url_qrcode = dirname(__FILE__) . '/EXPORT/qrcode_attest'.$fname.'.png';
         $qrcode= stripslashes($qrcode);
         $qrFile = QRcode::png($qrcode,$this->url_qrcode, 'M');
@@ -176,13 +176,13 @@ class ATTESTGEN {
                 case ATTESTGEN::TRAVAIL:
                     $pdf->SetXY($this->motPos['TRAVAIL'][0], $this->motPos['TRAVAIL'][1]);
                     break;
-                case ATTESTGEN::ENFANT:
+                case ATTESTGEN::ENFANTS:
                     $pdf->SetXY($this->motPos['ENFANT'][0], $this->motPos['ENFANT'][1]);
                     break;
-                case ATTESTGEN::LOISIR:
+                case ATTESTGEN::SPORT_ANIMAUX:
                     $pdf->SetXY($this->motPos['LOISIR'][0], $this->motPos['LOISIR'][1]);
                     break;
-                case ATTESTGEN::ACHAT:
+                case ATTESTGEN::ACHATS:
                     $pdf->SetXY($this->motPos['ACHAT'][0], $this->motPos['ACHAT'][1]);
                     break;
                 case ATTESTGEN::SANTE:
@@ -191,13 +191,13 @@ class ATTESTGEN {
                 case ATTESTGEN::FAMILLE:
                     $pdf->SetXY($this->motPos['FAMILLE'][0], $this->motPos['FAMILLE'][1]);
                     break;
-                case ATTESTGEN::HANDI:
+                case ATTESTGEN::HANDICAP:
                     $pdf->SetXY($this->motPos['HANDI'][0], $this->motPos['HANDI'][1]);
                     break;
-                case ATTESTGEN::JUDIC:
+                case ATTESTGEN::CONVOCATION:
                     $pdf->SetXY($this->motPos['JUDIC'][0], $this->motPos['JUDIC'][1]);
                     break;
-                case ATTESTGEN::MIG:
+                case ATTESTGEN::MISSIONS:
                     $pdf->SetXY($this->motPos['MIG'][0], $this->motPos['MIG'][1]);
                     break;
             }
@@ -207,6 +207,10 @@ class ATTESTGEN {
         // le png
         $pdf->Image($this->url_qrcode,155,230,32,32,'PNG');
 
+        if($secondPage){
+            $pdf->addPage();
+		    $pdf->Image(dirname(__FILE__) . '/EXPORT/qrcode_attest'.$fname.'.png', 20, 20, 100, 100);
+        }
         // enregistrement
 
         try {
