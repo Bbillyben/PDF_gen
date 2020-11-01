@@ -21,6 +21,8 @@ class ATTESTGEN {
     const MISSIONS = 'missions';
     const ENFANTS = 'enfants';
 
+    const certiFName = 'certificate.301020.pdf';
+
     //public $aMemberVar = 'aMemberVar Member Variable';
     public $generate_attest = 'generate_attest';
 
@@ -35,22 +37,22 @@ class ATTESTGEN {
         $this->idPos = array(
             'NOM'=>array(42,50),
             'DDN'=>array(42,58),
-            'LIEU_DDN'=>array(107,58),
-            'ADRESSE'=>array(47,66),
-            'SIG_VILLE'=>array(37,234),
+            'LIEU_DDN'=>array(105,57),
+            'ADRESSE'=>array(48,66),
+            'SIG_VILLE'=>array(48,234),
             'SIG_DATE'=>array(33,242),
-            'SIG_HEURE'=>array(90,242),
+            'SIG_HEURE'=>array(93,242),
             );
         $this->motPos= array(
-            'TRAVAIL' => array(28,91.5),
-            'ENFANT' => array(28,221),
-            'LOISIR' => array(28,169),
-            'ACHAT' => array(28,107),
-            'SANTE' => array(28,127),
-            'FAMILLE' => array(28,141),
-            'HANDI' => array(28,156),
-            'JUDIC' => array(28,191.5),
-            'MIG' => array(28,205)
+            'TRAVAIL' => array(26,91.5),
+            'ENFANT' => array(26,221),
+            'LOISIR' => array(26,170),
+            'ACHAT' => array(26,108),
+            'SANTE' => array(26,127.5),
+            'FAMILLE' => array(26,141.5),
+            'HANDI' => array(26,156),
+            'JUDIC' => array(26,192),
+            'MIG' => array(26,205.5)
             );
 
     }
@@ -131,10 +133,10 @@ class ATTESTGEN {
         try {
             $pdf = new FPDI();
             $pdf->addPage();
-            $pageCount = $pdf->setSourceFile(dirname(__FILE__) . '/Certificate/certificate.d1673940.pdf');
+            $pageCount = $pdf->setSourceFile(dirname(__FILE__).'/Certificate/'.ATTESTGEN::certiFName);
             $pageId = $pdf->importPage(1);
             $pdf->useTemplate($pageId);
-
+            
 
         }
         catch (Exception $e) {
