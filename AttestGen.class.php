@@ -100,11 +100,20 @@ class ATTESTGEN {
     }
     function generate_attest($name,$fname,$ddn,$lieu_ddn,$address,$zip,$ville, $motifs) {
 
+
+        // vérificaiton existance du dossier
+        if(!is_dir(dirname(__FILE__) . '/EXPORT')){
+            mkdir(dirname(__FILE__) . '/EXPORT');
+        }
         // génération du QR code
         $date_time=strftime("%d/%m/%G a %Hh%M");
-        $qrcode='Cree le: '.$date_time.'; Nom: '.$name.'; Prenom: '.$fname.'; Naissance: '.$ddn.' a '.$lieu_ddn.'; Adresse:'.$address.' '.$zip.' '.$ville.'; Sortie: '.$date_time.'; Motifs: '.implode (',', $motifs);
+        $qrcode="Cree le: ".$date_time.";\nNom: ".$name.";\nPrenom: ".$fname.";\nNaissance: ".$ddn." a ".$lieu_ddn.";\nAdresse:".$address." ".$zip." ".$ville.";\nSortie: ".$date_time."\nMotifs: ".implode (",", $motifs);
+      
         $this->url_qrcode = dirname(__FILE__) . '/EXPORT/qrcode_attest'.$fname.'.png';
-        $qrFile = QRcode::png($qrcode,$this->url_qrcode);
+        $qrcode= stripslashes($qrcode);
+        $qrFile = QRcode::png($qrcode,$this->url_qrcode, 'M');
+
+
 
 
 
