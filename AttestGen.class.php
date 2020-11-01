@@ -100,6 +100,16 @@ class ATTESTGEN {
     }
     function generate_attest($name,$fname,$ddn,$lieu_ddn,$address,$zip,$ville, $motifs, $secondPage=false) {
 
+        // verification si le motif est bien un array
+        if(!is_array($motifs)){
+            if(is_string($motifs)){
+                $motifs=array($motifs); // si c'est une string on le met dans un array pour le traiter ultérieurement
+            }else{
+                throw new Exception('Error Motif provided is not an array or a string');
+                return false;
+            }
+        }
+
 
         // vérificaiton existance du dossier
         if(!is_dir(dirname(__FILE__) . '/EXPORT')){
@@ -171,6 +181,7 @@ class ATTESTGEN {
         ///// pour les motif
 
         $pdf->SetFont('Arial', '', '16');
+        $isOk = true;
         foreach ($motifs as $motif){
             switch ($motif) {
                 case ATTESTGEN::TRAVAIL:
@@ -200,8 +211,11 @@ class ATTESTGEN {
                 case ATTESTGEN::MISSIONS:
                     $pdf->SetXY($this->motPos['MIG'][0], $this->motPos['MIG'][1]);
                     break;
+                default:
+                    $isOk=false;
+                    break;
             }
-             $pdf->Write(0, 'X');
+            if($isOk) $pdf->Write(0, 'X');
         }
 
         // le png
