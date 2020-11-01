@@ -8,6 +8,8 @@ Use of
 
 Class to be used : ATTESTGEN in PDF_gen/AttestGen.class.php
 
+It create an attestation at the date and time the script is called.
+
 
 Use : 
 
