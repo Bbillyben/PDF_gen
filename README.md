@@ -57,3 +57,11 @@ Motif availables : corresponding to the attestation
     const MISSIONS = 'missions';
     const ENFANTS = 'enfants';
 ```
+
+You can set the certificate file to use.
+Should be in '/certificate' folder, and position defined in the "position.json"
+```
+$success=$ag->setCertif("certifName.pdf");//return true if the file exist or false if not
+```
+
+
