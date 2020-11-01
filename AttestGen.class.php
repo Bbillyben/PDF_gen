@@ -27,7 +27,7 @@ class ATTESTGEN {
     public $generate_attest = 'generate_attest';
 
     protected $idPos; // array avec les positions des identifiants
-    protected $motPos; // array avec les position des cases à cocher motif
+    protected $motPos; // array avec les position des cases Ã  cocher motif
 
     protected $url_qrcode; // addresse du Ppng du qrcode au besoin
     protected $url_pdf; // addresse du Ppng du qrcode au besoin
@@ -37,7 +37,7 @@ class ATTESTGEN {
         $this->idPos = array(
             'NOM'=>array(42,50),
             'DDN'=>array(42,58),
-            'LIEU_DDN'=>array(105,57),
+            'LIEU_DDN'=>array(105,58),
             'ADRESSE'=>array(48,66),
             'SIG_VILLE'=>array(48,234),
             'SIG_DATE'=>array(33,242),
@@ -57,14 +57,14 @@ class ATTESTGEN {
 
     }
 
-    // retourne l'url du png du QR code une fois le fichier créé
+    // retourne l'url du png du QR code une fois le fichier crÃ©Ã©
     public function getPNGURL(){
         if (!isset($this->url_qrcode)){
             return false;
         }
         return $this->url_qrcode;
     }
-    //retourne l'URL du pdf une fois le fichier créé
+    //retourne l'URL du pdf une fois le fichier crÃ©Ã©
     public function getPDFURL(){
         if (!isset($this->url_pdf)){
             return false;
@@ -72,7 +72,7 @@ class ATTESTGEN {
         return $this->url_pdf;
     }
 
-    // detruit le fichier PDF si créé
+    // detruit le fichier PDF si crÃ©Ã©
     public function deletePDFFile(){
         if (!isset($this->url_pdf)){
             return false;
@@ -84,7 +84,7 @@ class ATTESTGEN {
         return unlink($this->url_pdf);
 
     }
-    // detruit le fichier QR code png créé
+    // detruit le fichier QR code png crÃ©Ã©
     public function deleteQRFile(){
         if (!isset($this->url_qrcode)){
             return false;
@@ -96,7 +96,7 @@ class ATTESTGEN {
         return unlink($this->url_qrcode);
 
     }
-    // détruit les 2 fichiers
+    // dÃ©truit les 2 fichiers
     public function deleteAllFiles(){
         return $this->deletePDFFile() && $this->deleteQRFile();
     }
@@ -105,7 +105,7 @@ class ATTESTGEN {
         // verification si le motif est bien un array
         if(!is_array($motifs)){
             if(is_string($motifs)){
-                $motifs=array($motifs); // si c'est une string on le met dans un array pour le traiter ultérieurement
+                $motifs=array($motifs); // si c'est une string on le met dans un array pour le traiter ultÃ©rieurement
             }else{
                 throw new Exception('Error Motif provided is not an array or a string');
                 return false;
@@ -113,11 +113,11 @@ class ATTESTGEN {
         }
 
 
-        // vérificaiton existance du dossier
+        // vÃ©rificaiton existance du dossier
         if(!is_dir(dirname(__FILE__) . '/EXPORT')){
             mkdir(dirname(__FILE__) . '/EXPORT');
         }
-        // génération du QR code
+        // gÃ©nÃ©ration du QR code
         $date_time=strftime("%d/%m/%G a %Hh%M");
         $qrcode="Cree le: ".$date_time.";\n Nom: ".$name.";\n Prenom: ".$fname.";\n Naissance: ".$ddn." a ".$lieu_ddn.";\n Adresse: ".$address." ".$zip." ".$ville.";\n Sortie: ".$date_time."\n Motifs: ".implode (",", $motifs);
 
@@ -129,7 +129,7 @@ class ATTESTGEN {
 
 
 
-        // génération du PDF
+        // gÃ©nÃ©ration du PDF
         try {
             $pdf = new FPDI();
             $pdf->addPage();
